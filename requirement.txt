@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+slowapi
+python-dotenv
+weaviate-client
+langchain-huggingface
+sentence-transformers
+transformers
