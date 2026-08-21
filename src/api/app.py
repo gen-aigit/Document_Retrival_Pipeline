@@ -1,8 +1,8 @@
-"""FastAPI app: creates the embedder and the long-lived async Weaviate
-client once at startup (both are expensive to construct - a ~440MB model
-load and a gRPC connection - and must never be re-created per request),
-and verifies all three configured collections exist before accepting
-traffic (fail fast rather than deferring to the first request).
+"""FastAPI app: creates the embedder, the reranker, and the long-lived async
+Weaviate client once at startup (all expensive to construct - model loads
+and a gRPC connection - and must never be re-created per request), and
+verifies all three configured collections exist before accepting traffic
+(fail fast rather than deferring to the first request).
 """
 
 from contextlib import asynccontextmanager
@@ -14,6 +14,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
 from src.api.errors import install_exception_handlers
+from src.api.rerank import CrossEncoderReranker
 from src.api.routes import router
 from src.config import settings
 from src.embeddings.embedder import Embedder
@@ -33,6 +34,9 @@ _COLLECTIONS_BY_CATEGORY = {
 async def lifespan(app: FastAPI):
     logger.info("Loading embedding model '%s'...", settings.embedding_model_name)
     app.state.embedder = Embedder()
+
+    logger.info("Loading reranker model '%s'...", settings.reranker_model_name)
+    app.state.reranker = CrossEncoderReranker(settings.reranker_model_name)
 
     async with weaviate_async_client() as client:
         for category, name in _COLLECTIONS_BY_CATEGORY.items():

@@ -7,8 +7,9 @@ import asyncio
 
 from fastapi import APIRouter, Depends
 
-from src.api.dependencies import get_collections, get_embedder, require_api_key
+from src.api.dependencies import get_collections, get_embedder, get_reranker, require_api_key
 from src.api.pipeline import retrieve
+from src.api.rerank import Reranker
 from src.api.schemas import RetrieveRequest, RetrieveResponse
 from src.config import settings
 from src.embeddings.embedder import Embedder
@@ -20,6 +21,7 @@ router = APIRouter()
 async def retrieve_endpoint(
     body: RetrieveRequest,
     embedder: Embedder = Depends(get_embedder),
+    reranker: Reranker = Depends(get_reranker),
     collections: dict = Depends(get_collections),
 ) -> RetrieveResponse:
     top_k = body.top_k or settings.default_top_k
@@ -28,6 +30,7 @@ async def retrieve_endpoint(
     return await asyncio.wait_for(
         retrieve(
             embedder=embedder,
+            reranker=reranker,
             collection=collection,
             query=body.query,
             category=body.category,

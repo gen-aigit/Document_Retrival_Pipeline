@@ -5,12 +5,17 @@ from typing import Optional
 
 from fastapi import Header, HTTPException, Request, status
 
+from src.api.rerank import Reranker
 from src.config import settings
 from src.embeddings.embedder import Embedder
 
 
 def get_embedder(request: Request) -> Embedder:
     return request.app.state.embedder
+
+
+def get_reranker(request: Request) -> Reranker:
+    return request.app.state.reranker
 
 
 def get_collections(request: Request) -> dict:

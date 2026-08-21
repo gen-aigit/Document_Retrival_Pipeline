@@ -21,6 +21,7 @@ class Settings:
     weaviate_api_key: Optional[str]
 
     embedding_model_name: str
+    reranker_model_name: str
 
     product_specs_collection: str
     technical_specs_collection: str
@@ -57,6 +58,7 @@ def _load_settings() -> Settings:
         weaviate_grpc_port=int(os.getenv("WEAVIATE_GRPC_PORT", "50051")),
         weaviate_api_key=os.getenv("WEAVIATE_API_KEY") or None,
         embedding_model_name=os.getenv("EMBEDDING_MODEL_NAME", "BAAI/bge-base-en-v1.5"),
+        reranker_model_name=os.getenv("RERANKER_MODEL_NAME", "BAAI/bge-reranker-base"),
         product_specs_collection=os.getenv("PRODUCT_SPECS_COLLECTION", "product_specs"),
         technical_specs_collection=os.getenv("TECHNICAL_SPECS_COLLECTION", "technical_specs"),
         refund_specs_collection=os.getenv("REFUND_SPECS_COLLECTION", "refund_specs"),
