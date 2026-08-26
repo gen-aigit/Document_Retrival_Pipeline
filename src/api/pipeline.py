@@ -58,6 +58,7 @@ async def retrieve(
     candidate_k = top_k * settings.candidate_k_multiplier
     search_start = time.perf_counter()
     results = await run_hybrid_search(collection, query, vector, category, candidate_k)
+    
     search_ms = (time.perf_counter() - search_start) * 1000
 
     rerank_start = time.perf_counter()
@@ -71,7 +72,7 @@ async def retrieve(
 
     logger.info(
         "retrieve category=%s query_chars=%d candidates=%d survivors=%d returned=%d "
-        "embed_ms=%.1f search_ms=%.1f rerank_ms=%.1f scores=%s",
+        "embed_ms=%.1f search_ms=%.1f rerank_ms=%.1f scores=%s hybrid_result=%s ranked_result=%s",
         category,
         len(query),
         len(results.objects),
@@ -81,6 +82,8 @@ async def retrieve(
         search_ms,
         rerank_ms,
         [round(score, 4) for _, score in truncated],
+        results,
+        reranked,
     )
 
     chunk_results = [_to_chunk_result(obj, score) for obj, score in truncated]
