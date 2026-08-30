@@ -12,7 +12,7 @@ Category = Literal["product", "technical", "refund"]
 class RetrieveRequest(BaseModel):
     query: str = Field(..., min_length=1)
     category: Category
-    top_k: Optional[int] = Field(default=None, gt=0, le=settings.max_top_k)
+    
 
     @field_validator("query")
     @classmethod

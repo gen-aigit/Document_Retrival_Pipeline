@@ -24,7 +24,7 @@ async def retrieve_endpoint(
     reranker: Reranker = Depends(get_reranker),
     collections: dict = Depends(get_collections),
 ) -> RetrieveResponse:
-    top_k = body.top_k or settings.default_top_k
+    top_k = settings.default_top_k
     collection = collections[body.category]
 
     return await asyncio.wait_for(

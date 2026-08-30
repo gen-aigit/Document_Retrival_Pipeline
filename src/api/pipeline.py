@@ -58,21 +58,21 @@ async def retrieve(
     candidate_k = top_k * settings.candidate_k_multiplier
     search_start = time.perf_counter()
     results = await run_hybrid_search(collection, query, vector, category, candidate_k)
-    
+
     search_ms = (time.perf_counter() - search_start) * 1000
 
+    threshold = score_threshold_for(category)
+    survivors = [obj for obj in results.objects if (obj.metadata.score or 0.0) >= threshold]
+
     rerank_start = time.perf_counter()
-    reranked = await loop.run_in_executor(None, reranker.rerank, query, results.objects)
+    reranked = await loop.run_in_executor(None, reranker.rerank, query, survivors)
     rerank_ms = (time.perf_counter() - rerank_start) * 1000
 
-    threshold = score_threshold_for(category)
-    survivors = [(obj, score) for obj, score in reranked if score >= threshold]
-
-    truncated = survivors[:top_k]
+    truncated = reranked[:top_k]
 
     logger.info(
         "retrieve category=%s query_chars=%d candidates=%d survivors=%d returned=%d "
-        "embed_ms=%.1f search_ms=%.1f rerank_ms=%.1f scores=%s hybrid_result=%s ranked_result=%s",
+        "embed_ms=%.1f search_ms=%.1f rerank_ms=%.1f scores=%s hybrid_result=%s rerank_result=%s",
         category,
         len(query),
         len(results.objects),
